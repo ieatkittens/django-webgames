@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load tz %}
+<html>
+    <head>
+        <meta charset='utf-8'>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="//code.jquery.com/jquery-2.2.4.min.js"></script>
+        <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script src="https://use.fontawesome.com/1ac96b5e55.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link type="text/css" href="{% static 'css/minesweeper.css' %}" rel="stylesheet">
+        {% block extra_js_imports %}
+        {% endblock extra_js_imports %}
+
+    </head>
+    <body>
+        {% block content %}
+        {% endblock content %}
+    </body>
+</html>
+
+<script>
+    {% block extra_js %}
+    {% endblock extra_js %}
+</script>

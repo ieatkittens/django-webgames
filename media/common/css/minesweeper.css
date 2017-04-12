@@ -1,0 +1,70 @@
+#gamewrapper{
+    width: 320px;
+	margin: 60px auto;
+    padding: 0px;
+	border: 8px solid ##B3E5FC;
+}
+
+
+#gameboard{
+    margin: auto;
+    padding: 0px;
+	width: auto;
+	height: 190px;
+	background-color: ##B3E5FC;
+}
+
+button.location{
+    display: inline-block;
+	float: left;
+	margin: 1px;
+	padding: 0px;
+	width: 30px;
+	height: 30px;
+	font-weight: bold;
+	font-size: 14px;
+	background-color: #0288D1;
+    border-right: 2px solid #448AFF;
+	border-bottom: 2px solid #448AFF;
+	border-top: 2px solid #B3E5FC;
+	border-left: 2px solid #B3E5FC;
+}
+
+button.location.bomb {
+    float: left;
+	background-color: #FFCCCB;
+    border-top: 2px solid #E4B1AB;
+	border-left: 2px solid #E4B1AB;
+	border-right: 2px solid #DA5552;
+	border-bottom: 2px solid #DA5552;
+}
+
+button.location.visible,  button.location:active{
+    border-top: 2px solid #B3E5FC;
+	border-left: 2px solid #B3E5FC;
+	border-right: 2px solid #B3E5FC;
+	border-bottom: 2px solid #B3E5FC;
+	background-color: #B3E5FC;
+
+}
+
+body{
+    text-align: center;
+    background-color: #AED9E8;
+}
+
+.panel{
+    background-color: #5ABCE8;
+    border: 1px solid #0288D1;
+}
+.panel .panel-heading{
+    background-color: #01A4E0;
+}
+
+#message{
+    margin-top: 20px;
+}
+
+#reset{
+    margin-top: 20px;
+}

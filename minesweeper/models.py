@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
+
 from django.utils import timezone
 from random import randint
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
-from minesweeper.constants import MINE
+from minesweeper.constants import MINE, IN_PROGRESS, WON, LOST
 
 
 class MinesweeperGame(models.Model):
@@ -20,18 +22,43 @@ class MinesweeperGame(models.Model):
     board = ArrayField(ArrayField(models.IntegerField()), null=True)
     visibility = ArrayField(ArrayField(models.BooleanField()), null=True)
     flagged = ArrayField(ArrayField(models.BooleanField()), null=True)
-    status = models.IntegerField(default=0)
+    status = models.IntegerField(default=IN_PROGRESS)
 
     def start(self):
+        """ Starts the game by generating an empty board, generating the mines and setting
+            the started timestamp
+        """
         self.generate_empty_board()
         self.generate_mines()
         self.started = timezone.now()
+        self.status = IN_PROGRESS
+        self.save()
+
+    def game_lost(self):
+        """ Changes conditions to reflect that the user has lost the game.
+        """
+        self.status = LOST
+        self.set_board_visibility(True)
+        self.save()
+
+    def game_won(self):
+        """ Changes conditions to reflect that the user has won the game.
+        """
+        self.status = WON
+        self.set_board_visibility(True)
+        self.save()
+
+    def set_board_visibility(self, state):
+        """ Sets visibility for all locations on the board to state value
+        """
+        self.visibility = [[state] * self.board_size for _ in xrange(self.board_size)]
         self.save()
 
     def generate_empty_board(self):
         """ Generates a blank (and fully hidden) board.
         """
         self.board = [[0] * self.board_size for _ in xrange(self.board_size)]
+        self.set_board_visibility(False)
         self.visibility = [[False] * self.board_size for _ in xrange(self.board_size)]
         self.flagged = [[False] * self.board_size for _ in xrange(self.board_size)]
 
@@ -89,17 +116,60 @@ class MinesweeperGame(models.Model):
         """
         return (x >= 0 and x < self.board_size and y >= 0 and y < self.board_size)
 
-    def process_move(self, x, y):
+    def user_move(self, x, y, move_type='clear'):
         """ Accepts the x and y coordinates of a move submitted by the player, updates our
             board and determines if the game has been won or lost.
         """
-        self.make_visible(x, y)
-        if self.board[x][y] == 0:
-            self.make_visible_adjacent_squares(x, y)
-        elif self.contains_mine(x, y):
-            self.game_lost()
+        if move_type == 'clear':
+            # If we clear a location that we have flagged, toggle the flag off.
+            if self.is_flagged(x, y):
+                self.toggle_flag(x, y)
+
+            # Make the location visible
+            self.make_visible(x, y)
+
+            # If there are no adjacent mines, cascade out and clear adjacent squares as well
+            if self.board[x][y] == 0:
+                self.make_visible_adjacent_squares(x, y)
+
+            # If there is a mine in the square, trigger a game loss.
+            elif self.contains_mine(x, y):
+                self.game_lost()
+
+            self.check_for_win()
 
         self.save()
+
+    def check_for_win(self):
+        """ Checks if the player has won the game, and if they have, triggers the game_won
+            function.  The game is won if all squares that do not contain mines are visible.
+        """
+        # Get the total number of spaces minus the number of 'visible' spaces
+        total_non_visible_squares = self.board_size ** 2 - len([value for row in self.visibility for value in row if value is True])
+        # If total number of 'non_visible' spaces is equal to the number of mines, you win!
+        all_non_mines_visible = True if total_non_visible_squares == self.num_mines else False
+        if all_non_mines_visible:
+            self.game_won()
+
+    def toggle_flag(self, x, y):
+        """ Accepts the x and y coordinates of a move submitted by the player and toggles
+            the flagged value for that location if it is inside our board and that
+            location is currently not visible
+        """
+        if self.inside_board(x, y) and not self.is_visible(x, y):
+            self.flagged[x][y] = True
+
+    def is_flagged(self, x, y):
+        """ Accepts the x and y coordinates of a location in our array and returns True
+            if it is flagged or False if it is not.
+        """
+        return self.flagged[x][y]
+
+    def remove_flag(self, x, y):
+        """ Accepts the x and y coordinates of a move submitted by the player adds a flag
+            to that location if it is not currently visible and it is inside the bound of
+            our board
+        """
 
     def make_visible_adjacent_squares(self, x, y):
         """ Accepts the x and y coordinates of a location in our array and sets all
@@ -109,7 +179,7 @@ class MinesweeperGame(models.Model):
             offset_x = x + x_offset
             for y_offset in range(-1, 2):
                 offset_y = y + y_offset
-                if self.inside_board(x, y) and not self.is_visible(offset_x, offset_y):
+                if self.inside_board(offset_x, offset_y) and not self.is_visible(offset_x, offset_y):
                     self.make_visible(offset_x, offset_y)
                     if self.board[offset_x][offset_y] == 0:
                         self.make_visible_adjacent_squares(offset_x, offset_y)
@@ -122,6 +192,28 @@ class MinesweeperGame(models.Model):
 
     def is_visible(self, x, y):
         """ Accepts the x and y coordinates of a location in our array and returns True
-            if it is visible or false if it is not.
+            if it is visible or False if it is not.
         """
         return self.visibility[x][y]
+
+    def get_visible_boardstate(self):
+        """ Returns a 2D array with all publicly available information.
+        """
+        visible_array = self.visibility
+        for x, row in enumerate(visible_array):
+            for y, col in enumerate(row):
+                # First reveal visible squares
+                visible_array[x][y] = self.board[x][y] if col else 'not_visible'
+                # Then reveal flagged squares
+                visible_array[x][y] = self.flagged[x][y] if self.flagged[x][y] else visible_array[x][y]
+
+        return visible_array
+
+    def client_json_boardstate(self):
+        """ Returns the current public boardstate in JSON format - only visible squares
+            and flagged squares.
+        """
+        visible_array = self.get_visible_boardstate()
+        json_array = json.dumps(visible_array)
+
+        return json_array
