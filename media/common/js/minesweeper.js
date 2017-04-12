@@ -1,3 +1,13 @@
+function toggle_flag_button(){
+    $('#toggle-flag').toggleClass('activated');
+    $('#toggle-flag').toggleClass('not-activated');
+    if ($('#toggle-flag').prop('value') == 'clear'){
+        $('#toggle-flag').prop('value', 'flag');
+    } else {
+        $('#toggle-flag').prop('value', 'clear');
+    }
+}
+
 function reset_game(url, game_id){
     $('#message').html('');
     $.ajax({
@@ -45,7 +55,9 @@ function update_boardstate(game_status, message, boardstate) {
             if (column != 'not_visible'){
                 if (column == -1){
                 $btn.attr('class', 'location bomb').html('<i class="fa fa-bomb" aria-hidden="true"></i>');
-                } else{
+                } else if(column == 'flagged') {
+                    $btn.attr('class', 'location flag').html('<i class="fa fa-flag" aria-hidden="true"></i>');
+                } else {
                     $btn.attr('class', 'location visible');
                     if (column === 0) {
                         $btn.html('');

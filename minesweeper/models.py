@@ -120,10 +120,7 @@ class MinesweeperGame(models.Model):
         """ Accepts the x and y coordinates of a move submitted by the player, updates our
             board and determines if the game has been won or lost.
         """
-        if move_type == 'clear':
-            # If we clear a location that we have flagged, toggle the flag off.
-            if self.is_flagged(x, y):
-                self.toggle_flag(x, y)
+        if move_type == 'clear' and not self.is_flagged(x, y):
 
             # Make the location visible
             self.make_visible(x, y)
@@ -136,7 +133,10 @@ class MinesweeperGame(models.Model):
             elif self.contains_mine(x, y):
                 self.game_lost()
 
-            self.check_for_win()
+        elif move_type == 'flag' and self.inside_board(x, y) and not self.is_visible(x, y):
+            self.toggle_flag(x, y)
+
+        self.check_for_win()
 
         self.save()
 
@@ -156,8 +156,8 @@ class MinesweeperGame(models.Model):
             the flagged value for that location if it is inside our board and that
             location is currently not visible
         """
-        if self.inside_board(x, y) and not self.is_visible(x, y):
-            self.flagged[x][y] = True
+        self.flagged[x][y] = not self.flagged[x][y]
+        self.save()
 
     def is_flagged(self, x, y):
         """ Accepts the x and y coordinates of a location in our array and returns True
@@ -181,6 +181,8 @@ class MinesweeperGame(models.Model):
                 offset_y = y + y_offset
                 if self.inside_board(offset_x, offset_y) and not self.is_visible(offset_x, offset_y):
                     self.make_visible(offset_x, offset_y)
+                    if self.is_flagged(offset_x, offset_y):
+                        self.toggle_flag(offset_x, offset_y)
                     if self.board[offset_x][offset_y] == 0:
                         self.make_visible_adjacent_squares(offset_x, offset_y)
 
@@ -205,7 +207,7 @@ class MinesweeperGame(models.Model):
                 # First reveal visible squares
                 visible_array[x][y] = self.board[x][y] if col else 'not_visible'
                 # Then reveal flagged squares
-                visible_array[x][y] = self.flagged[x][y] if self.flagged[x][y] else visible_array[x][y]
+                visible_array[x][y] = 'flagged' if self.flagged[x][y] else visible_array[x][y]
 
         return visible_array
 

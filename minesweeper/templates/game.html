@@ -13,8 +13,11 @@
                 <div id="gameboard">
                     {% for row in visible_array %}
                         {% for column in row %}
+                            <!-- Use a flag favicon for a flag -->
+                            {% if column == 'flagged' %}
+                                <button class="location flag" x="{{ forloop.parentloop.counter0 }}" y="{{ forloop.counter0 }}"><i class="fa fa-flag" aria-hidden="true"></i></button>
                             <!-- For anything that is visible (but not a bomb), use the actual value. -->
-                            {% if column != "not_visible" and column != -1 %}
+                            {% elif column != "not_visible" and column != -1 %}
                                 <button class="location visible" x="{{ forloop.parentloop.counter0 }}" y="{{ forloop.counter0 }}"> {% if column != 0 %} {{column}} {% endif %}</button>
                             <!-- Use a bomb favicon for a bomb -->
                             {% elif column == -1 %}
@@ -42,6 +45,7 @@
 <div class='container'>
     <div class='row'>
         <div class='col-md-12'>
+        <button class='btn btn-flag not-activated' id='toggle-flag' value='clear'><i class="fa fa-flag" aria-hidden="true"></i></button>
         <button class='btn btn-primary' id='reset'>Reset</button>
         </div>
     </div>
@@ -56,11 +60,16 @@ $('#reset').bind('click', function(e) {
     reset_game("{% url 'ajax_reset_game' %}", {{ game.id }});
 });
 
+$('#toggle-flag').bind('click', function(e) {
+    e.preventDefault();
+    toggle_flag_button();
+});
+
 $('.location').bind('click',function(e) {
     e.preventDefault();
     var x = $(this).attr('x');
     var y = $(this).attr('y');
-    var move_type = 'clear';
+    var move_type = $('#toggle-flag').val();
     submit_move('{% url 'ajax_submit_move' %}', {{ game.id }}, x, y, move_type );
 });
 {% endblock extra_js %}

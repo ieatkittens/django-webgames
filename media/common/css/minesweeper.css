@@ -39,6 +39,15 @@ button.location.bomb {
 	border-bottom: 2px solid #DA5552;
 }
 
+button.location.flag {
+    color: #DA5552;
+    background-color: #FFCCCB;
+    border-top: 2px solid #E4B1AB;
+    border-left: 2px solid #E4B1AB;
+    border-right: 2px solid #DA5552;
+    border-bottom: 2px solid #DA5552;
+}
+
 button.location.visible,  button.location:active{
     border-top: 2px solid #B3E5FC;
 	border-left: 2px solid #B3E5FC;
@@ -46,6 +55,24 @@ button.location.visible,  button.location:active{
 	border-bottom: 2px solid #B3E5FC;
 	background-color: #B3E5FC;
 
+}
+
+.btn.btn-flag{
+    margin-top: 20px;
+}
+
+.btn.btn-flag.not-activated{
+    background-color: #337ab7;
+    color: #DA5552;
+}
+
+.btn.btn-flag.activated{
+    margin-top: 20px;
+    background-color: #FFCCCB;
+    border-top: 2px solid #E4B1AB;
+	border-left: 2px solid #E4B1AB;
+	border-right: 2px solid #DA5552;
+	border-bottom: 2px solid #DA5552;
 }
 
 body{
