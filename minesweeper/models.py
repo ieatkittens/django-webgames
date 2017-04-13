@@ -72,10 +72,11 @@ class MinesweeperGame(models.Model):
         for num in range(self.num_mines):
             self.place_mine()
         # Generate empty board
-
         for mine_location in self.mine_locations:
             self.board[mine_location[0]][mine_location[1]] = MINE
             self.increment_adjacent_squares(mine_location)
+
+        self.save()
 
     def get_client_json_boardstate(self):
         """ Returns the current public boardstate in JSON format - only visible squares
@@ -106,9 +107,11 @@ class MinesweeperGame(models.Model):
         x, y = mine_location
 
         for x_offset in range(-1, 2):
+            offset_x = x + x_offset
             for y_offset in range(-1, 2):
-                if self.is_inside_board(x, y) and not self.contains_mine(x, y):
-                    self.increment_square(x + x_offset, y + y_offset)
+                offset_y = y + y_offset
+                if self.is_inside_board(offset_x, offset_y) and not self.contains_mine(offset_x, offset_y):
+                    self.increment_square(offset_x, offset_y)
 
     def increment_square(self, x, y):
         """ Increments a square.

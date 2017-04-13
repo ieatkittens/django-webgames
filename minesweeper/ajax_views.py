@@ -21,7 +21,7 @@ class AjaxResetGame(JSONResponseMixin, AjaxResponseMixin, View):
 
         if game:
             game.start()
-            json_boardstate = game.client_json_boardstate()
+            json_boardstate = game.get_client_json_boardstate()
             context['json_boardstate'] = json_boardstate
             context['game_status'] = game.status
         else:
@@ -50,7 +50,7 @@ class AjaxProcessMove(JSONResponseMixin, AjaxResponseMixin, View):
 
         if game and x and y:
             game.user_move(int(x), int(y), move_type)
-            json_boardstate = game.client_json_boardstate()
+            json_boardstate = game.get_client_json_boardstate()
             context['json_boardstate'] = json_boardstate
             if game.status == WON:
                 context['message'] = 'You win!  Hit Reset to play again.'
