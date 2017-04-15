@@ -17,10 +17,10 @@
                             {% if column == 'flagged' %}
                                 <button class="location flag" x="{{ forloop.parentloop.counter0 }}" y="{{ forloop.counter0 }}"><i class="fa fa-flag" aria-hidden="true"></i></button>
                             <!-- For anything that is visible (but not a bomb), use the actual value. -->
-                            {% elif column != "not_visible" and column != -1 %}
+                            {% elif column is not None %}
                                 <button class="location visible" x="{{ forloop.parentloop.counter0 }}" y="{{ forloop.counter0 }}"> {% if column != 0 %} {{column}} {% endif %}</button>
                             <!-- Use a bomb favicon for a bomb -->
-                            {% elif column == -1 %}
+                            {% elif column == 'mined' %}
                                 <button class="location bomb" x="{{ forloop.parentloop.counter0 }}" y="{{ forloop.counter0 }}"><i class="fa fa-bomb" aria-hidden="true"></i></button>
                             <!-- Otherwise don't display anything -->
                             {% else %}
@@ -45,8 +45,9 @@
 <div class='container'>
     <div class='row'>
         <div class='col-md-12'>
-        <button class='btn btn-flag not-activated' id='toggle-flag' value='clear'><i class="fa fa-flag" aria-hidden="true"></i></button>
-        <button class='btn btn-primary' id='reset'>Reset</button>
+        <button class='btn btn-primary control' id='undo' value='undo'><i class="fa fa-undo" aria-hidden="true"></i></button>
+        <button class='btn btn-flag not-activated control' id='toggle-flag' value='clear'><i class="fa fa-flag" aria-hidden="true"></i></button>
+        <button class='btn btn-primary control' id='reset'>Reset</button>
         </div>
     </div>
 </div>
@@ -58,6 +59,14 @@
 $('#reset').bind('click', function(e) {
     e.preventDefault();
     reset_game("{% url 'ajax_reset_game' %}", {{ game.id }});
+});
+
+$('#undo').bind('click', function(e) {
+    e.preventDefault();
+    var x = 0;
+    var y = 0;
+    var move_type = 'undo';
+    submit_move('{% url 'ajax_submit_move' %}', {{ game.id }}, x, y, move_type );
 });
 
 $('#toggle-flag').bind('click', function(e) {

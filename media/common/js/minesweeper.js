@@ -52,8 +52,8 @@ function update_boardstate(game_status, message, boardstate) {
     $.each(boardstate_obj, function(index_x, row) {
         $.each(row, function(index_y, column) {
             var $btn = $("button[x$='" + index_x +"'][y$='" +index_y+ "']");
-            if (column != 'not_visible'){
-                if (column == -1){
+            if (column !== null){
+                if (column == 'mined'){
                 $btn.attr('class', 'location bomb').html('<i class="fa fa-bomb" aria-hidden="true"></i>');
                 } else if(column == 'flagged') {
                     $btn.attr('class', 'location flag').html('<i class="fa fa-flag" aria-hidden="true"></i>');

@@ -15,12 +15,12 @@ class AjaxResetGame(JSONResponseMixin, AjaxResponseMixin, View):
         game_id = request.GET.get('game_id', None)
 
         try:
-            game = MinesweeperGame.objects.get(id=game_id)
+            game = MinesweeperGame.objects.prefetch_related('fields').get(id=game_id)
         except MinesweeperGame.DoesNotExist:
             game = None
 
         if game:
-            game.start()
+            game.reset()
             json_boardstate = game.get_client_json_boardstate()
             context['json_boardstate'] = json_boardstate
             context['game_status'] = game.status
@@ -44,7 +44,7 @@ class AjaxProcessMove(JSONResponseMixin, AjaxResponseMixin, View):
         y = request.GET.get('y', None)
 
         try:
-            game = MinesweeperGame.objects.get(id=game_id)
+            game = MinesweeperGame.objects.prefetch_related('fields').get(id=game_id)
         except MinesweeperGame.DoesNotExist:
             game = None
 

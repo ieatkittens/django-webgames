@@ -57,17 +57,12 @@ button.location.visible,  button.location:active{
 
 }
 
-.btn.btn-flag{
-    margin-top: 20px;
-}
-
 .btn.btn-flag.not-activated{
     background-color: #337ab7;
     color: #DA5552;
 }
 
 .btn.btn-flag.activated{
-    margin-top: 20px;
     background-color: #FFCCCB;
     border-top: 2px solid #E4B1AB;
 	border-left: 2px solid #E4B1AB;
@@ -89,9 +84,5 @@ body{
 }
 
 #message{
-    margin-top: 20px;
-}
-
-#reset{
     margin-top: 20px;
 }
