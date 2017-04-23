@@ -18,9 +18,9 @@ function reset_game(url, game_id){
         dataType: 'json',
         success: function (data) {
             update_boardstate(
-                data['game_status'],
-                data['message'],
-                data['json_boardstate']
+                data.game_status,
+                data.message,
+                data.json_boardstate
             );
         }
     });
@@ -38,17 +38,30 @@ function submit_move(url,game_id, x, y, move_type) {
         dataType: 'json',
         success: function (data) {
             update_boardstate(
-                data['game_status'],
-                data['message'],
-                data['json_boardstate']
+                data.game_status,
+                data.message,
+                data.json_boardstate
             );
         }
     });
 }
 
+function render_new_game_modal(url) {
+    var csrftoken = getCookie('csrftoken');
+    $('.new_game_modal_container').html('').load(
+        url,
+        {
+            'csrfmiddlewaretoken': csrftoken,
+        },
+        function(){
+            $('.dossier_summary_modal').modal('show');
+        }
+    );
+}
+
 function update_boardstate(game_status, message, boardstate) {
+    console.log(game_status);
     var boardstate_obj = $.parseJSON(boardstate);
-    $('#message').html(message);
     $.each(boardstate_obj, function(index_x, row) {
         $.each(row, function(index_y, column) {
             var $btn = $("button[x$='" + index_x +"'][y$='" +index_y+ "']");
@@ -70,4 +83,17 @@ function update_boardstate(game_status, message, boardstate) {
             }
         });
     });
+    if (game_status !== 0){
+        var modal_title = '';
+        if (game_status==1) {
+            modal_title = 'You Win!';
+        } else {
+            modal_title = 'You Lose!';
+        }
+        $('#message').html(message);
+        $('#modal_title').html(modal_title);
+        $('#newgamesubmit').html('Play Again');
+        $('#newgamemodal').modal('show');
+
+    }
 }

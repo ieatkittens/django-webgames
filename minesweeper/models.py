@@ -174,8 +174,8 @@ class MinesweeperGame(BaseGame):
         elif move_type == 'flag' and self.flag_count() < self.num_mines:
             field.flagged = False if field.flagged else True
             field.save()
-
-        self.check_for_win()
+        if not self.status == LOST:
+            self.check_for_win()
         current_turn.save()
 
 

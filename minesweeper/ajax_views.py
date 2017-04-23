@@ -1,7 +1,9 @@
+from random import randint
+
 from braces.views import AjaxResponseMixin, JSONResponseMixin
 from django.views.generic import View
 
-from minesweeper.constants import WON, LOST
+from minesweeper.constants import WON, LOST, SUCCESS_MESSAGES, FAILURE_MESSAGES
 from minesweeper.models import MinesweeperGame
 
 
@@ -53,9 +55,9 @@ class AjaxProcessMove(JSONResponseMixin, AjaxResponseMixin, View):
             json_boardstate = game.get_client_json_boardstate()
             context['json_boardstate'] = json_boardstate
             if game.status == WON:
-                context['message'] = 'You win!  Hit Reset to play again.'
+                context['message'] = SUCCESS_MESSAGES[randint(0, len(SUCCESS_MESSAGES) - 1)]
             elif game.status == LOST:
-                context['message'] = 'You Lost!  Hit Reset to try again.'
+                context['message'] = FAILURE_MESSAGES[randint(0, len(FAILURE_MESSAGES) - 1)]
             context['game_status'] = game.status
         else:
             context['message'] = 'Game with ID {} not found'.format(game_id)
